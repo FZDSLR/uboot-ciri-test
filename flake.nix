@@ -18,22 +18,28 @@
         hash = "sha256-ZG/4/9DM54n66GdArYbzWCPy0gkKi0SmNtbmInFq0cw=";
       };
       myDefconfig = ./mt8188_ciri_defconfig;
+      myDefconfigName = "mt8188_ciri_defconfig";
       myPatches = [ ];
 
-      customUboot = pkgs.buildUBoot rec {
-        defconfig = "mt8188_ciri_defconfig";
-        version = defaultVersion;
-        src = defaultSrc;
-        filesToInstall = [
-          "u-boot-mtk.bin"
-        ];
-        postPatch = ''
-          echo "Replacing defconfig with custom version..."
-          cp ${myDefconfig} configs/${defconfig}
-          ${pkgs.buildUBoot.postPatch or ""}
-        '';
-        extraPatches = myPatches;
-      };
+      customUboot =
+        (pkgs.buildUBoot {
+          defconfig = "mt8188_ciri_defconfig";
+          version = defaultVersion;
+          src = defaultSrc;
+          filesToInstall = [
+            "u-boot-mtk.bin"
+          ];
+
+          extraPatches = myPatches;
+        }).overrideAttrs
+          (
+            finalAttrs: previousAttrs: {
+              postPatch = previousAttrs.postPatch or "" + ''
+                echo "Replacing defconfig with custom version..."
+                cp ${myDefconfig} configs/${myDefconfigName}
+              '';
+            }
+          );
     in
     {
       packages = {
