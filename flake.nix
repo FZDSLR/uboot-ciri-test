@@ -32,6 +32,7 @@
             "u-boot.bin"
             "u-boot-dtb.bin"
             "u-boot-mtk.bin"
+            ".config"
           ];
 
           extraPatches = myPatches;
