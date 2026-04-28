@@ -42,3 +42,4 @@ jobs:
           name: u-boot-${{ matrix.target }}
           path: result/
           if-no-files-found: error
+          include-hidden-files: true
