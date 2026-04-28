@@ -1,0 +1,44 @@
+name: Build U-Boot with Nix Flake
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-uboot:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        target:
+          - aarch64-linux
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build U-Boot for ${{ matrix.target }}
+        run: |
+          nix build --print-build-logs ".#packages.${{ matrix.target }}.uboot"
+
+      - name: List generated files
+        run: |
+          echo "Build result in ./result:"
+          ls -la result/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: u-boot-${{ matrix.target }}
+          path: result/
+          if-no-files-found: error
