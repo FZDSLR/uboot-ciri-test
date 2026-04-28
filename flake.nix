@@ -27,6 +27,7 @@
           version = defaultVersion;
           src = defaultSrc;
           filesToInstall = [
+            "u-boot"
             "u-boot.dtb"
             "u-boot.bin"
             "u-boot-dtb.bin"
