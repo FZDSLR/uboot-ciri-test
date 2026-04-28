@@ -15,15 +15,18 @@
       defaultSrc = pkgs.fetchgit {
         url = "https://gitlab.denx.de/u-boot/u-boot.git";
         rev = "v${defaultVersion}";
-        hash = "sha256-1k6id9qj5rnn6sk492qa179g48sqyf3ash37x3x8krycs3zzhvv4";
+        hash = "sha256-ZG/4/9DM54n66GdArYbzWCPy0gkKi0SmNtbmInFq0cw=";
       };
-      myDefconfig = ./my-board_defconfig;
+      myDefconfig = ./mt8188_ciri_defconfig;
       myPatches = [ ];
 
       customUboot = pkgs.buildUBoot rec {
         defconfig = "mt8188_ciri_defconfig";
         version = defaultVersion;
         src = defaultSrc;
+        filesToInstall = [
+          "u-boot-mtk.bin"
+        ];
         postPatch = ''
           echo "Replacing defconfig with custom version..."
           cp ${myDefconfig} configs/${defconfig}
@@ -33,8 +36,12 @@
       };
     in
     {
-      packages.${targetSystem}.uboot = customUboot;
-      packages.${targetSystem}.default = customUboot;
+      packages = {
+        ${targetSystem} = {
+          uboot = customUboot;
+          default = customUboot;
+        };
+      };
 
       devShells.${targetSystem}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
